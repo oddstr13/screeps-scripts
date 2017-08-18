@@ -51,7 +51,12 @@ var roleBuilder = {
                 }
             }
         } else {
-            tools.fetchEnergy(creep);
+            if ((!tools.fetchEnergy(creep)) && (creep.carry.energy>1)) {
+                // Fall back to mining when creep has energy and no source found
+                // (source is out, let's use the time waiting for something usefull)
+                console.log("foobar");
+                creep.memory.building = true;
+            }
         }
     }
 };

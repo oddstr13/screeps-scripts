@@ -10,7 +10,7 @@ module.exports = {
             if (creep.carryCapacity == _.sum(creep.carry)) {
                 creep.memory.task = 'empty';
                 delete creep.memory.target;
-                console.log(creep.name + ": I'm full.");
+                //console.log(creep.name + ": I'm full.");
 
             } else {
                 if ((!creep.memory.target) || (!creep.memory.roomName)) {
@@ -44,7 +44,7 @@ module.exports = {
             if (creep.carry.energy == 0) {
                 creep.memory.task = 'mine';
                 delete creep.memory.target;
-                console.log(creep.name + ": I'm empty.");
+                //console.log(creep.name + ": I'm empty.");
             } else {
                 if (creep.memory.target == undefined) {
                     var target = tools.findClosestEnergyStorage(creep);

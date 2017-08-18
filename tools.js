@@ -124,11 +124,116 @@ tools.fetchEnergy = function(creep) {
         if (res != OK) {
             creep.moveTo(source.pos, {visualizePathStyle: {stroke: '#0000ff'}});
         }
+        return true;
     } else {
         var source = tools.findClosestEnergySource(creep);
-        if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+        if (source) {
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+            return true;
         }
+    }
+    return false;
+}
+
+function roadbuilder_costmatrix(roomName) {
+    let costs = new PathFinder.CostMatrix;
+    room = Game.rooms[roomName];
+    if (!room) {
+        return false;
+    }
+
+    var structures = room.find(FIND_STRUCTURES);
+    for (var i in structures) {
+        var structure = structures[i];
+
+        if (structure.structureType == STRUCTURE_ROAD || structure.structureType == STRUCTURE_RAMPART) {
+            costs.set(structure.pos.x, structure.pos.y, 3);
+        } else {
+            costs.set(structure.pos.x, structure.pos.y, 10);
+        }
+    }
+
+    var csites = room.find(FIND_CONSTRUCTION_SITES);
+    for (var i in csites) {
+        var csite = csites[i];
+        if (csite.structureType == STRUCTURE_ROAD || csite.structureType == STRUCTURE_RAMPART) {
+            costs.set(csite.pos.x, csite.pos.y, 3);
+        } else {
+            costs.set(csite.pos.x, csite.pos.y, 10);
+        }
+    }
+
+    return costs;
+}
+
+tools.buildRoad = function(from, to) {
+    var path = PathFinder.search(from, {pos: to, range: 1}, {roomCallback: roadbuilder_costmatrix, plainCost:4, swampCost:4});
+    var style = "solid";
+    if (path.incomplete) {
+        style = "dotted";
+    }
+
+    Game.rooms[from.roomName].visual.poly(path.path, {stroke:'#ff0000', opacity:1, lineStyle: style});
+
+    for (var i in path.path) {
+        var pos = path.path[i];
+        var road = !!_.filter(pos.lookFor(LOOK_STRUCTURES), (structure) => structure.structureType == STRUCTURE_ROAD).length;
+        var construction = !!pos.lookFor(LOOK_CONSTRUCTION_SITES).length;
+        if (!(road || construction)) {
+            Game.rooms[pos.roomName].createConstructionSite(pos, STRUCTURE_ROAD);
+        }
+    }
+}
+
+tools.multi0 = function(arr, fill=0) {
+  var result = [];
+  if (arr.length == 1) {
+    for (var i = 0; i < arr[0]; i++) {
+      result.push(fill);
+    }
+  } else {
+    var children = arr.slice(1);
+    for (var i = 0; i < arr[0]; i++) {
+      result.push(tools.multi0(children));
+    }
+  }
+  return result;
+}
+
+tools.hasTime = function(amount) {
+    return Game.cpu.limit - Game.cpu.getUsed() >= amount;
+}
+
+tools.hasExtendedTime = function(amount) {
+    return _.min([Game.cpu.tickLimit, Game.cpu.bucket]) - Game.cpu.getUsed() >= amount;
+}
+
+
+tools.randInt = function(min, max) {
+    if (max == undefined) {
+        max = min;
+        min = 0;
+    }
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+tools.isExitBlocked = function(room, exit) {
+    console.log(room, exit);
+    var res;
+    if (exit == FIND_EXIT_TOP) {
+        return !!room.lookForAtArea(LOOK_STRUCTURES, 0, 0, 0, 49, true).length;
+    } else if (exit == FIND_EXIT_LEFT) {
+        return !!room.lookForAtArea(LOOK_STRUCTURES, 0, 0, 49, 0, true).length;
+    } else if (exit == FIND_EXIT_RIGHT) {
+        return !!room.lookForAtArea(LOOK_STRUCTURES, 0, 49, 49, 49, true).length;
+    } else if (exit == FIND_EXIT_BOTTOM) {
+        return !!room.lookForAtArea(LOOK_STRUCTURES, 49, 0, 49, 49, true).length;
+    } else if (exit < 0) {
+        return false;
     }
 }
 

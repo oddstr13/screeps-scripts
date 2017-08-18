@@ -1,11 +1,12 @@
 module.exports = {
+    mapping: true,
     creeps: {
         miner: {
             icon: '⛏️M',
-            wants: 2,
+            wants: 3,
             parts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
             role: "miner",
-            condition: (spawn) => spawn.room.energyCapacityAvailable >= 550,
+            condition: (spawn) => spawn.room.energyCapacityAvailable >= 550 && spawn.room.find(FIND_STRUCTURES, {filter: (structure) => structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_CONTAINER}).length,
         },
         harvester: {
             icon: '⛏️H',
@@ -30,7 +31,7 @@ module.exports = {
         },
         upgrader2: {
             icon: '🔦U',
-            wants: 3,
+            wants: 2,
             parts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
             role: "upgrader",
             condition: (spawn) => spawn.room.energyCapacityAvailable >= 550,
@@ -40,14 +41,20 @@ module.exports = {
             wants: 1,
             parts: [WORK, CARRY, MOVE],
             role: "builder",
-            condition: (spawn) => _.filter(Game.constructionSites, (x) => x.my).length && spawn.room.energyCapacityAvailable < 550,
+            condition: (spawn) => spawn.room.energyCapacityAvailable < 550 && _.filter(Game.constructionSites, (x) => x.my).length,
         },
         builder2: {
             icon: '🔨B',
             wants: 1,
             parts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
             role: "builder",
-            condition: (spawn) => _.filter(Game.constructionSites, (x) => x.my).length && spawn.room.energyCapacityAvailable >= 550,
+            condition: (spawn) => spawn.room.energyCapacityAvailable >= 550 && _.filter(Game.constructionSites, (x) => x.my).length,
         },
+        explorer: {
+            icon: 'E',
+            wants: 0,
+            parts: [MOVE, MOVE, MOVE],
+            role: "explorer",
+        }
     }
 };
