@@ -13,7 +13,7 @@ module.exports = {
                 //console.log(creep.name + ": I'm full.");
 
             } else {
-                if ((!creep.memory.target) || (!creep.memory.roomName)) {
+                if ((!creep.memory.target) || (!creep.memory.target.roomName)) {
                     var target = tools.findClosestEnergySource(creep);
                     if (target) {
                         creep.memory.target = {x: target.pos.x, y: target.pos.y, roomName: target.pos.roomName};

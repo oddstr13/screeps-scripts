@@ -50,7 +50,7 @@ tools.findEnergyStorage = function(creep) {
             }
             
             return (structure.structureType == STRUCTURE_STORAGE ||
-                    structure.structureType == STRUCTURE_CONTAINER) && structure.store.energy < structure.storeCapacity;
+                    structure.structureType == STRUCTURE_CONTAINER) && _.sum(structure.store) < structure.storeCapacity;
         }
     });
 };
@@ -98,11 +98,7 @@ tools.findClosestEnergyTarget = function(creep) {
 };
 
 tools.findClosestEnergySource = function(creep) {
-    return creep.pos.findClosestByPath(FIND_SOURCES, {
-        filter: (source) => {
-            return source.energy;
-        }
-    });
+    return creep.pos.findClosestByPath(FIND_SOURCES, {filter: (source) => source.energy});
 }
 
 tools.fetchEnergy = function(creep) {
