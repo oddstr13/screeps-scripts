@@ -3,17 +3,17 @@ module.exports = {
     creeps: {
         miner: {
             icon: '⛏️M',
-            wants: 3,
-            parts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
+            wants: 2,
+            parts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
             role: "miner",
             condition: (spawn) => spawn.room.energyCapacityAvailable >= 550 && spawn.room.find(FIND_STRUCTURES, {filter: (structure) => structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_CONTAINER}).length,
         },
         harvester: {
             icon: '⛏️H',
             wants: 1,
-            parts: [WORK, CARRY, MOVE],
+            parts: [CARRY, CARRY, MOVE],
             role: "harvester",
-            condition: (spawn) => spawn.room.energyCapacityAvailable < 550,
+            //condition: (spawn) => spawn.room.energyCapacityAvailable < 550,
         },
         harvester2: {
             icon: '⚒️H',
@@ -45,8 +45,8 @@ module.exports = {
         },
         builder2: {
             icon: '🔨B',
-            wants: 1,
-            parts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
+            wants: 3,
+            parts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE],
             role: "builder",
             condition: (spawn) => spawn.room.energyCapacityAvailable >= 550 && _.filter(Game.constructionSites, (x) => x.my).length,
         },

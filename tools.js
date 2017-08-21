@@ -164,21 +164,36 @@ function roadbuilder_costmatrix(roomName) {
     return costs;
 }
 
-tools.buildRoad = function(from, to) {
+tools.buildRoad = function(from, to, visualOnly) {
     var path = PathFinder.search(from, {pos: to, range: 1}, {roomCallback: roadbuilder_costmatrix, plainCost:4, swampCost:4});
     var style = "solid";
     if (path.incomplete) {
         style = "dotted";
     }
 
-    Game.rooms[from.roomName].visual.poly(path.path, {stroke:'#ff0000', opacity:1, lineStyle: style});
+    var rooms = _.map(_.uniq(path.path, false, (p)=>p.roomName), (p)=>p.roomName);
+    //console.log(JSON.stringify(rooms));
+    for (let i in rooms) {
+        var segment = _.filter(path.path, (p)=>p.roomName==rooms[i]);
+        if (Game.rooms[rooms[i]]) {
+            Game.rooms[rooms[i]].visual.poly(segment, {stroke:'#ff0000', opacity:1, lineStyle: style});
+        }
+    }
 
-    for (var i in path.path) {
-        var pos = path.path[i];
-        var road = !!_.filter(pos.lookFor(LOOK_STRUCTURES), (structure) => structure.structureType == STRUCTURE_ROAD).length;
-        var construction = !!pos.lookFor(LOOK_CONSTRUCTION_SITES).length;
-        if (!(road || construction)) {
-            Game.rooms[pos.roomName].createConstructionSite(pos, STRUCTURE_ROAD);
+    //Game.rooms[from.roomName].visual.poly(path.path, {stroke:'#ff0000', opacity:1, lineStyle: style});
+
+    if (!visualOnly && !path.incomplete) {
+        for (var i in path.path) {
+            var pos = path.path[i];
+            var road = !!_.filter(pos.lookFor(LOOK_STRUCTURES), (structure) => structure.structureType == STRUCTURE_ROAD).length;
+            var construction = !!pos.lookFor(LOOK_CONSTRUCTION_SITES).length;
+            if (!(road || construction)) {
+                var res = Game.rooms[pos.roomName].createConstructionSite(pos, STRUCTURE_ROAD);
+                if (res == ERR_FULL) {
+                    return false;
+                }
+                //console.log(pos.roomName, res);
+            }
         }
     }
 }

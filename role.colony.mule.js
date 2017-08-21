@@ -15,7 +15,7 @@ module.exports = {
             } else {
                 var storage = tools.findEnergyStorage(creep)[0]
                 for (var resource in storage.store) {
-                    console.log(resource);
+                    //console.log(resource);
                     if (creep.transfer(storage, resource) != OK) {
                         creep.moveTo(storage.pos);
                     }
@@ -39,9 +39,14 @@ module.exports = {
                     return false;
                 }
                 var storage = Game.getObjectById(colony.storage);
+                if (!storage) {
+                    creep.say("?");
+                    return false;
+                }
                 for (var resource in storage.store) {
-                    console.log(resource);
-                    if (creep.withdraw(storage, resource) != OK) {
+                    //console.log(resource);
+                    var ret = creep.withdraw(storage, resource);
+                    if (ret == ERR_NOT_IN_RANGE || ret == ERR_INVALID_TARGET) {
                         creep.moveTo(storage.pos);
                     }
                     return false;

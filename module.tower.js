@@ -28,6 +28,18 @@ module.exports = {
                         continue;
                     }
 
+                    var closestHurt = tower.pos.findClosestByRange(FIND_MY_CREEPS, {
+                        filter: (c) => {
+                            return c.hits < c.hitsMax;
+                        }
+                    });
+                    
+                    if (closestHurt) {
+                        tower.heal(closestHurt);
+                        continue;
+                    }
+
+
                     var damaged = tower.room.find(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return structure.hits < structure.hitsMax;
@@ -46,6 +58,7 @@ module.exports = {
                     var most_damaged = damaged_sorted[0];
                     if (most_damaged) {
                         tower.repair(most_damaged);
+                        continue;
                     }
                 }
             }

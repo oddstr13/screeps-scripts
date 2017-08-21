@@ -16,7 +16,17 @@ var roleBuilder = {
 
         if (creep.memory.building) {
             var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+            if (!target) {
+                //console.log(JSON.stringify(Game.constructionSites));
+                target = Game.constructionSites[Object.keys(Game.constructionSites)[0]];
+                //console.log(JSON.stringify(target));
+            }
+
             if (target) {
+                creep.say("🚧");
+                if (Game.rooms[target.pos.roomName]) {
+                    Game.rooms[target.pos.roomName].visual.circle(target.pos, {radius:0.6, stroke:"#ffff00", fill:"", opacity:0.4});
+                }
                 if (creep.build(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
@@ -54,7 +64,7 @@ var roleBuilder = {
             if ((!tools.fetchEnergy(creep)) && (creep.carry.energy>1)) {
                 // Fall back to mining when creep has energy and no source found
                 // (source is out, let's use the time waiting for something usefull)
-                console.log("foobar");
+                //console.log("foobar");
                 creep.memory.building = true;
             }
         }

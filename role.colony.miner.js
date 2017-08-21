@@ -37,14 +37,14 @@ module.exports = {
                             //console.log("Mining target found: ", target);
                         } else {
                             //console.log("No mining target");
-                            return
+                            return;
                         }
                     }
                     
                     var targetPos = new RoomPosition(creep.memory.target.x, creep.memory.target.y, creep.memory.target.roomName);
                     if (creep.pos.roomName != targetPos.roomName) {
                         creep.moveTo(targetPos);
-                        return
+                        return;
                     }
                     
                     var target = targetPos.lookFor(LOOK_SOURCES)[0];

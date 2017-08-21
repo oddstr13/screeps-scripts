@@ -2,6 +2,7 @@ var roles = {
     builder: require("role.builder"),
     "colony.miner": require("role.colony.miner"),
     "colony.mule": require("role.colony.mule"),
+    "colony.sentry": require("role.colony.sentry"),
     explorer: require("role.explorer"),
     harvester: require("role.harvester"),
     miner: require("role.miner"),
@@ -72,21 +73,32 @@ module.exports.loop = function () {
         }
     }
 
+    // Creep movement
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
+        if (creep.memory.role == undefined) {
+            continue;
+        }
         if (creep.memory.role && !roles[creep.memory.role]) {
             try {
                 console.log("Loading role " + creep.memory.role + "...");
                 roles[creep.memory.role] = require('role.' + creep.memory.role);
             } catch (e) {
                 console.log("Error loading " + creep.memory.role);
+                console.log(e.stack);
             }
         }
 
         if (roles[creep.memory.role]) {
             for (let i=0; i<10; i++) {
-                if (! roles[creep.memory.role].run(creep) ) {
-                    break;
+                try {
+                    if (! roles[creep.memory.role].run(creep) ) {
+                        break;
+                    }
+                } catch (e) {
+                    Game.notify("Creep " + name + " threw an exception: " + e + "\n\nRole: `" + creep.memory.role + "` Pos: " + JSON.stringify(creep.pos) + "\nMemory:" + JSON.stringify(creep.memory) + "\n\n" + e.stack);
+                    console.log("Creep " + name + " threw an exception: " + e);
+                    console.log(e.stack);
                 }
             }
         } else {
