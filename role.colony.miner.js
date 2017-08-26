@@ -94,7 +94,7 @@ module.exports = {
                         //console.log(JSON.stringify(colony));
                         var csites = _.filter(creep.room.lookForAtArea(LOOK_CONSTRUCTION_SITES, colony.pos.y-2, colony.pos.x-2, colony.pos.y+2, colony.pos.x+2, true),
                             (s) => s.constructionSite.structureType == STRUCTURE_CONTAINER);
-                        //console.log(colony.pos.y-2, colony.pos.x-2, colony.pos.y+2, colony.pos.x+2);
+                        //console.log(colony.pos.roomName, colony.pos.y-2, colony.pos.x-2, colony.pos.y+2, colony.pos.x+2);
                         //console.log(JSON.stringify(csites));
                         if (csites.length) {
                             var csite = csites[0].constructionSite
@@ -102,6 +102,8 @@ module.exports = {
                             creep.memory.target = {x: csite.pos.x, y: csite.pos.y, roomName: csite.pos.roomName};
                             return true;
                         } else {
+                            //let foo = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
+                            
                             if (creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER) == OK) {
                                 creep.memory.task = "build";
                                 creep.memory.target = {x: creep.pos.x, y: creep.pos.y, roomName: creep.pos.roomName};

@@ -13,7 +13,7 @@ module.exports = {
             if (creep.pos.roomName != creep.memory.base) {
                 creep.moveTo(new RoomPosition(25, 25, creep.memory.base));
             } else {
-                var storage = tools.findEnergyStorage(creep)[0]
+                var storage = _.sortBy(tools.findEnergyStorage(creep), (e) => tools.getRange(creep, e))[0];
                 for (var resource in storage.store) {
                     //console.log(resource);
                     if (creep.transfer(storage, resource) != OK) {

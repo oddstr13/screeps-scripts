@@ -18,18 +18,41 @@ var roleHarvester = {
         if (!creep.memory.working) {
             tools.fetchEnergy(creep);
         } else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_SPAWN ||
-                        structure.structureType == STRUCTURE_TOWER ||
-                        structure.structureType == STRUCTURE_CONTAINER
-                    ) && structure.energy < structure.energyCapacity;
+            var target;
+            if (!target && (creep.room.energyAvailable/creep.room.energyCapacityAvailable>0.55 || creep.room.hostiles.length)) {
+                // Prioritize filling towers.
+                var towers = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.energy < (structure.energyCapacity/4)
+                });
+                if (towers.length) {
+                    target = creep.pos.findClosestByPath(towers);
                 }
-            });
-            if (targets.length > 0) {
-                var target = creep.pos.findClosestByPath(targets);
-                if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            }
+            if (!target) {
+                var targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION
+                            || structure.structureType == STRUCTURE_SPAWN
+                            //|| structure.structureType == STRUCTURE_CONTAINER
+                        ) && structure.energy < structure.energyCapacity;
+                    }
+                });
+                if (targets.length > 0) {
+                    var target = creep.pos.findClosestByPath(targets);
+                }
+            }
+            if (!target) {
+                var towers = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity
+                });
+                if (towers.length) {
+                    target = creep.pos.findClosestByPath(towers);
+                }
+            }
+            
+
+            if (target) {
+                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             } else {

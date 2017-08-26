@@ -23,7 +23,7 @@ var roleBuilder = {
             }
 
             if (target) {
-                creep.say("🚧");
+                //creep.say("🚧");
                 if (Game.rooms[target.pos.roomName]) {
                     Game.rooms[target.pos.roomName].visual.circle(target.pos, {radius:0.6, stroke:"#ffff00", fill:"", opacity:0.4});
                 }

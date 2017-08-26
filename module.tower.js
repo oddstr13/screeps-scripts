@@ -22,7 +22,7 @@ module.exports = {
                         tower.repair(closestDamagedStructure);
                         continue;
                     }*/
-                    var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+                    var closestHostile = tower.pos.findClosestByRange(tower.room.hostiles);
                     if (closestHostile) {
                         tower.attack(closestHostile);
                         continue;
@@ -33,7 +33,7 @@ module.exports = {
                             return c.hits < c.hitsMax;
                         }
                     });
-                    
+
                     if (closestHurt) {
                         tower.heal(closestHurt);
                         continue;
@@ -57,8 +57,10 @@ module.exports = {
                     });
                     var most_damaged = damaged_sorted[0];
                     if (most_damaged) {
-                        tower.repair(most_damaged);
-                        continue;
+                        if (most_damaged.hits < 50000 || (tower.energy > (tower.energyCapacity/2))) {
+                            tower.repair(most_damaged);
+                            continue;
+                        }
                     }
                 }
             }

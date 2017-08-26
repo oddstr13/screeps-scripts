@@ -1,0 +1,19 @@
+{
+    "name": "screeps-bot-oddstr13",
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Oddstr13's first screeps bot",
+    "keywords": [
+        "screeps",
+        "game",
+        "bot"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/oddstr13/screeps-scripts.git"
+    },
+    "dependencies": {
+        "lodash": ">=3.10.1 <4.0.0"
+//        "ScreepsAutocomplete": "^1.0.0"
+    }
+}

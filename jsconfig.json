@@ -1,0 +1,22 @@
+{
+    "include": [
+        "**/*.js"
+    ],
+    
+    "compilerOptions": {
+//        "noLib": true,
+
+        "target": "es6",
+        "baseUrl": ".",
+        "checkJs": false
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "typeAcquisition": {
+        "include": [
+            "lodash"
+        ]
+    }
+
+}

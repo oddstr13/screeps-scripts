@@ -1,9 +1,9 @@
+'use strict';
+
 var config = require('config');
 var tools = require('tools');
 
 module.exports = {
-
-    /** @param {Creep} creep **/
     run: function() {
         // Colony memory init
         if (!Memory.colonies) {
@@ -40,8 +40,14 @@ module.exports = {
             }
         }
 
-        if ((Game.time+1) % 100 == 0) {
-            console.log("colony room roads");
+        if (!config.mod_colony) {
+            return false;
+        }
+
+
+        if ((Game.time+1) % 51 == 0) {
+            let built = 0;
+            console.log("Colony inter-room roads");
             var rooms = {}
             //console.log(1);
             for (let colonyId in Memory.colonies) {
@@ -70,79 +76,108 @@ module.exports = {
 
                             if (room2 && flag2) {
                                 if (Object.keys(Game.constructionSites).length < 60) {
-                                    console.log(flag.name, flag2.name);
-                                    tools.buildRoad(flag.pos, flag2.pos, false);
+                                    //console.log(flag.name, flag2.name);
+                                    built = tools.buildRoad(flag.pos, flag2.pos, false);
                                 }
                             }
                         }
+                        if (built) {
+                            break;
+                        }
                     }
                 }
+                if (built) {
+                    break;
+                }
+            }
+            if (built) {
+                console.log(built + " new inter-room road construction sites.");
             }
         }
-        
-        if ((Game.time+2) % 100 == 0) {
-            console.log("colony local roads");
+
+        if ((Game.time+2) % 51 == 0) {
+            console.log("Colony local roads");
             for (let colonyId in Memory.colonies) {
                 let colony = Memory.colonies[colonyId];
                 let flag = Game.flags[colony.pos.roomName + " center"];
+                //let colonyStorage = Game.getObjectById(colony.storage);
                 if (flag) {
                     if (Object.keys(Game.constructionSites).length < 60) {
-                        tools.buildRoad(flag.pos, colony.pos, true);
+                        //let built = tools.buildRoad(flag.pos, colony.pos);
+                        let built;
+                        if (!built && colony.storage) {
+                            let cstore = Game.getObjectById(colony.storage);
+                            if (cstore) {
+                                built = tools.buildRoad(flag.pos, cstore.pos);
+                            }
+                        }
+                        if (built) {
+                            console.log(built + " new road construction sites in room " + colony.pos.roomName + ".");
+                            break;
+                        }
                     }
                 }
                 
             }
         }
+        
 
-
-        for (let flagName in Game.flags) {
-            let flag = Game.flags[flagName];
-            if (_.endsWith(flagName, " center")) {
-                let hasColony = false;
-                for (let colonyId in Memory.colonies) {
-                    let colony = Memory.colonies[colonyId];
-                    if (colony.pos.roomName == flag.pos.roomName) {
-                        hasColony = true;
-                        break;
+        if (Game.time % 15 == 0) {
+            for (let flagName in Game.flags) {
+                let flag = Game.flags[flagName];
+                if (_.endsWith(flagName, " center")) {
+                    let hasColony = false;
+                    for (let colonyId in Memory.colonies) {
+                        let colony = Memory.colonies[colonyId];
+                        if (colony.pos.roomName == flag.pos.roomName) {
+                            hasColony = true;
+                            break;
+                        }
                     }
-                }
-                if (hasColony) {
-                    if (!flag.memory.sentries) {
-                        flag.memory.sentries = {};
-                    }
-                    if (Object.keys(flag.memory.sentries).length < 2) {
-                        var newName = Game.spawns.Home.createCreep([HEAL, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE],
-                            undefined, {role:"colony.sentry", flag: flagName}); // RANGED_ATTACK
-                        
-                        if (typeof newName == "string") {
-                            console.log("New sentry for " + flagName + " spawned: " + newName);
-                            flag.memory.sentries[newName] = true;
+                    if (hasColony) {
+                        if (!flag.memory.sentries) {
+                            flag.memory.sentries = {};
+                        }
+                        if (Object.keys(flag.memory.sentries).length < 2) {
+                            var newName = tools.spawnAnywhere([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, HEAL, MOVE, MOVE, MOVE],
+                                undefined, {role:"colony.sentry", flag: flagName}); // RANGED_ATTACK
+                            
+                            if (typeof newName == "string") {
+                                console.log("New sentry for " + flagName + " spawned: " + newName);
+                                flag.memory.sentries[newName] = true;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // FIXME: Spawn is hardcoded.
-        for (let colonyId in Memory.colonies) {
-            let colony = Memory.colonies[colonyId];
-            if (!_.filter(colony.workers, (t) => t == "colony.miner").length) {
-                //console.log("No miner in colony " + colonyId);
-                var newName = Game.spawns.Home.createCreep([WORK, WORK, WORK, CARRY, MOVE, MOVE], undefined, {role:"colony.miner", colony: colonyId});
-                if (typeof newName == "string") {
-                    console.log("New miner for colony " + colonyId + " spawned: " + newName);
-                    colony.workers[newName] = "colony.miner";
+            var randomizedColonyIds = _.shuffle(Object.keys(Memory.colonies));
+            //console.log(JSON.stringify(randomizedColonyIds));
+            for (let colonyId of randomizedColonyIds) {
+                //console.log(colonyId);
+                let colony = Memory.colonies[colonyId];
+                let flag = Game.flags[colony.pos.roomName + " center"];
+                let storage = Game.getObjectById(colony.storage);
+                if (colony.storage && storage && storage.storeCapacity && _.sum(storage.store)
+                    && (_.filter(colony.workers, (t) => t == "colony.miner").length)
+                    && (!_.filter(colony.workers, (t) => t == "colony.mule").length)) {
+                    //console.log("No mule in colony " + colonyId);
+                    var newName = tools.spawnAnywhere([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], undefined, {role:"colony.mule", colony: colonyId, base: Game.spawns.Home.pos.roomName});
+                    if (typeof newName == "string") {
+                        console.log("New mule for colony " + colonyId + " spawned: " + newName);
+                        colony.workers[newName] = "colony.mule";
+                    }
                 }
-            }
-            if (colony.storage && (!_.filter(colony.workers, (t) => t == "colony.mule").length)) {
-                //console.log("No mule in colony " + colonyId);
-                var newName = Game.spawns.Home.createCreep([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], undefined, {role:"colony.mule", colony: colonyId, base: Game.spawns.Home.pos.roomName});
-                if (typeof newName == "string") {
-                    console.log("New mule for colony " + colonyId + " spawned: " + newName);
-                    colony.workers[newName] = "colony.mule";
+                if (!_.filter(colony.workers, (t) => t == "colony.miner").length && Object.keys(flag.memory.sentries).length) {
+                    //console.log("No miner in colony " + colonyId);
+                    var newName = tools.spawnAnywhere([WORK, WORK, WORK, CARRY, MOVE, MOVE], undefined, {role:"colony.miner", colony: colonyId});
+                    if (typeof newName == "string") {
+                        console.log("New miner for colony " + colonyId + " spawned: " + newName);
+                        colony.workers[newName] = "colony.miner";
+                    }
                 }
-            }
 
+            }
         }
     }
 };
