@@ -13,7 +13,7 @@
         "url": "https://github.com/oddstr13/screeps-scripts.git"
     },
     "dependencies": {
-        "lodash": ">=3.10.1 <4.0.0"
+        "lodash": ">=3.10.1"
 //        "ScreepsAutocomplete": "^1.0.0"
     }
 }
